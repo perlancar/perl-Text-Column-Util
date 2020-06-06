@@ -54,9 +54,9 @@ our %argopt_num_columns = (
     },
 );
 
-$SPEC{combine_texts_in_columns} = {
+$SPEC{show_texts_in_columns} = {
     v => 1.1,
-    summary => 'Combine texts into columns',
+    summary => 'Show texts in columns',
     args => {
         %args_common,
         %argopt_num_columns,
@@ -71,9 +71,10 @@ $SPEC{combine_texts_in_columns} = {
         req_one => ['texts', 'gen_texts'],
     },
 };
-sub combine_texts_in_columns {
+sub show_texts_in_columns {
     require Term::App::Util::Size;
     require Text::ANSI::WideUtil;
+    require Text::Tabs;
 
     my %args = @_;
     my $texts = $args{texts};
@@ -103,7 +104,7 @@ sub combine_texts_in_columns {
     $column_width > 1 or return [412, "No horizontal room for the columns"];
     #log_trace "column_width is $column_width";
 
-    $texts = $args{_gen_texts}->() if $args{_gen_texts};
+    $texts = $args{gen_texts}->() if $args{gen_texts};
 
     # split each text into lines
     my @text_lines;
@@ -113,6 +114,7 @@ sub combine_texts_in_columns {
         for my $line (split /^/m, $texts->[$i]) {
             $linum++;
             chomp $line;
+            $line = Text::Tabs::expand($line);
             if ($on_long_line eq 'wrap') {
                 push @$text_lines, (map {[$linum, $_]} split /\R/, Text::ANSI::WideUtil::ta_mbwrap($line, $column_width));
             } elsif ($on_long_line eq 'keep') { # for testing
