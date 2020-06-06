@@ -104,7 +104,11 @@ sub show_texts_in_columns {
     $column_width > 1 or return [412, "No horizontal room for the columns"];
     #log_trace "column_width is $column_width";
 
-    $texts = $args{gen_texts}->() if $args{gen_texts};
+    if ($args{gen_texts}) {
+        $texts = $args{gen_texts}->(
+            column_width => $column_width,
+        );
+    }
 
     # split each text into lines
     my @text_lines;
